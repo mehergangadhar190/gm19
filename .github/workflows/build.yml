@@ -1,0 +1,51 @@
+name: GM Manager Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Flutter
+        run: |
+          git clone --depth 1 --branch 3.44.7 https://github.com/flutter/flutter.git "$HOME/flutter"
+          echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
+          "$HOME/flutter/bin/flutter" --version
+
+      - name: Create Flutter project
+        run: |
+          if [ ! -f pubspec.yaml ]; then
+            "$HOME/flutter/bin/flutter" create --platforms=android --project-name=gmmanager .
+          fi
+
+      - name: Get packages
+        run: |
+          "$HOME/flutter/bin/flutter" pub get
+
+      - name: Analyze
+        run: |
+          "$HOME/flutter/bin/flutter" analyze
+
+      - name: Build APK
+        run: |
+          "$HOME/flutter/bin/flutter" build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: GM-Manager-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
