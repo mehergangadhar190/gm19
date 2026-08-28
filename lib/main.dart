@@ -16,14 +16,7 @@ class GMManagerApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.dark,
         colorSchemeSeed: Colors.green,
-        scaffoldBackgroundColor: const Color(0xFF0B0F0D),
-        cardTheme: CardThemeData(
-          color: const Color(0xFF151A17),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
+        scaffoldBackgroundColor: const Color(0xFF0D1117),
       ),
       home: const GMHome(),
     );
@@ -38,29 +31,28 @@ class GMHome extends StatefulWidget {
 }
 
 class _GMHomeState extends State<GMHome> {
-  int _selectedIndex = 0;
+  int selectedIndex = 0;
 
-  final List<Widget> _pages = const [
+  final List<Widget> pages = const [
     DashboardPage(),
     ContentPage(),
     PlannerPage(),
     ProfilePage(),
   ];
 
+  void selectPage(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: _pages[_selectedIndex],
-      ),
+      body: pages[selectedIndex],
       bottomNavigationBar: NavigationBar(
-        backgroundColor: const Color(0xFF111512),
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
+        selectedIndex: selectedIndex,
+        onDestinationSelected: selectPage,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
@@ -68,8 +60,8 @@ class _GMHomeState extends State<GMHome> {
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.photo_library_outlined),
-            selectedIcon: Icon(Icons.photo_library),
+            icon: Icon(Icons.grid_view_outlined),
+            selectedIcon: Icon(Icons.grid_view),
             label: 'Content',
           ),
           NavigationDestination(
@@ -88,70 +80,64 @@ class _GMHomeState extends State<GMHome> {
   }
 }
 
-// ============================================================
-// DASHBOARD
-// ============================================================
+/* -------------------------------------------------------------------------- */
+/* DASHBOARD                                                                  */
+/* -------------------------------------------------------------------------- */
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar.large(
-          backgroundColor: const Color(0xFF0B0F0D),
-          title: const Text(
-            'GM Manager',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () => showInfo(
-                context,
-                'GM Assistant',
-                'GM is your personal Instagram and social-media manager. '
-                    'Use the tools below to plan, prepare and review your content.',
+    return SafeArea(
+      child: CustomScrollView(
+        slivers: [
+          SliverAppBar.large(
+            title: const Text('GM Manager'),
+            actions: [
+              IconButton(
+                tooltip: 'Notifications',
+                onPressed: () {
+                  showInfo(context, 'Notifications',
+                      'No new GM notifications right now.');
+                },
+                icon: const Icon(Icons.notifications_none),
               ),
-              icon: const Icon(Icons.auto_awesome),
+            ],
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                const _WelcomeCard(),
+                const SizedBox(height: 16),
+                const SectionTitle(
+                  title: 'Today',
+                  subtitle: 'Your personal social-media manager',
+                ),
+                const SizedBox(height: 10),
+                const RecommendationCard(),
+                const SizedBox(height: 20),
+                const SectionTitle(
+                  title: 'GM Features',
+                  subtitle: 'Everything in one place',
+                ),
+                const SizedBox(height: 10),
+                FeatureGrid(),
+                const SizedBox(height: 20),
+                const SectionTitle(
+                  title: 'What GM can decide for you',
+                  subtitle: 'Based on your personal style',
+                ),
+                const SizedBox(height: 10),
+                const DecisionList(),
+                const SizedBox(height: 20),
+                const NaturalLookCard(),
+              ]),
             ),
-          ],
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              const _WelcomeCard(),
-              const SizedBox(height: 18),
-              _SectionTitle(
-                title: 'Today',
-                action: 'View plan',
-                onTap: () {},
-              ),
-              const SizedBox(height: 10),
-              const _TodayCard(),
-              const SizedBox(height: 22),
-              _SectionTitle(
-                title: 'AI Post Suggestions',
-                action: 'Open',
-                onTap: () => showFeature(context, 'AI Post Suggestions'),
-              ),
-              const SizedBox(height: 10),
-              const _AISuggestionCard(),
-              const SizedBox(height: 22),
-              const _SectionTitle(title: 'GM Features'),
-              const SizedBox(height: 10),
-              _FeatureGrid(context),
-              const SizedBox(height: 22),
-              const _SectionTitle(title: 'What GM can decide for you'),
-              const SizedBox(height: 10),
-              const _DecisionList(),
-              const SizedBox(height: 20),
-              const _NaturalLookNotice(),
-            ]),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -170,13 +156,13 @@ class _WelcomeCard extends StatelessWidget {
               width: 58,
               height: 58,
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: .15),
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.auto_awesome,
-                color: Colors.greenAccent,
                 size: 30,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
               ),
             ),
             const SizedBox(width: 16),
@@ -185,16 +171,15 @@ class _WelcomeCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Good to see you.',
+                    'Welcome to GM',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 21,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   SizedBox(height: 5),
                   Text(
-                    'GM is ready to plan your next post.',
-                    style: TextStyle(color: Colors.white60),
+                    'Your personal Instagram & content manager.',
                   ),
                 ],
               ),
@@ -206,8 +191,8 @@ class _WelcomeCard extends StatelessWidget {
   }
 }
 
-class _TodayCard extends StatelessWidget {
-  const _TodayCard();
+class RecommendationCard extends StatelessWidget {
+  const RecommendationCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -217,87 +202,43 @@ class _TodayCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.today, color: Colors.greenAccent),
-                SizedBox(width: 10),
-                Text(
-                  'Today’s recommendation',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Icon(
+                  Icons.lightbulb_outline,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Today\'s recommendation',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 14),
             const Text(
-              'Prepare one clean lifestyle photo for your next Instagram post.',
-              style: TextStyle(fontSize: 16),
+              'Create a clean, natural post with a premium look. '
+              'Keep the background authentic and avoid heavy editing.',
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: [
-                _SmallTag(text: 'Natural'),
-                _SmallTag(text: 'Premium'),
-                _SmallTag(text: 'Clean'),
+              children: const [
+                TagChip(label: 'Natural'),
+                TagChip(label: 'Premium'),
+                TagChip(label: 'Clean'),
+                TagChip(label: 'Professional'),
               ],
-            ),
-            const SizedBox(height: 14),
-            FilledButton.icon(
-              onPressed: () => showFeature(context, 'Today’s Plan'),
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text('Open plan'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _AISuggestionCard extends StatelessWidget {
-  const _AISuggestionCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Row(
-              children: [
-                Icon(Icons.psychology, color: Colors.greenAccent),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Choose 2–3 photos',
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'GM will help compare your photos and prepare a post recommendation.',
-              style: TextStyle(color: Colors.white60),
             ),
             const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () =>
-                        showFeature(context, 'Photo Selection'),
-                    icon: const Icon(Icons.add_photo_alternate_outlined),
-                    label: const Text('Choose photos'),
-                  ),
-                ),
-              ],
+            FilledButton.icon(
+              onPressed: null,
+              icon: Icon(Icons.auto_awesome),
+              label: Text('AI recommendation'),
             ),
           ],
         ),
@@ -306,106 +247,155 @@ class _AISuggestionCard extends StatelessWidget {
   }
 }
 
-Widget _FeatureGrid(BuildContext context) {
-  final features = [
-    ('Photo Studio', Icons.camera_alt_outlined),
-    ('Planner', Icons.calendar_month_outlined),
-    ('Analytics', Icons.analytics_outlined),
-    ('Approval', Icons.verified_outlined),
-    ('Stories & Collage', Icons.auto_stories_outlined),
-    ('Highlights Manager', Icons.star_outline),
+class FeatureGrid extends StatelessWidget {
+  FeatureGrid({super.key});
+
+  final List<_Feature> features = const [
+    _Feature('Photo Studio', Icons.photo_camera_outlined),
+    _Feature('AI Post Suggestions', Icons.auto_awesome),
+    _Feature('Instagram Stories', Icons.auto_stories_outlined),
+    _Feature('Reels', Icons.video_library_outlined),
+    _Feature('Collage Creator', Icons.collections_outlined),
+    _Feature('Highlights Manager', Icons.star_border),
+    _Feature('Content Calendar', Icons.calendar_month_outlined),
+    _Feature('Drafts', Icons.drafts_outlined),
+    _Feature('Saved Ideas', Icons.lightbulb_outline),
+    _Feature('Approval', Icons.check_circle_outline),
+    _Feature('Analytics', Icons.analytics_outlined),
+    _Feature('Personal Style', Icons.person_outline),
   ];
-
-  return GridView.builder(
-    shrinkWrap: true,
-    physics: const NeverScrollableScrollPhysics(),
-    itemCount: features.length,
-    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 2,
-      crossAxisSpacing: 10,
-      mainAxisSpacing: 10,
-      childAspectRatio: 1.45,
-    ),
-    itemBuilder: (context, index) {
-      final item = features[index];
-
-      return Card(
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () => showFeature(context, item.$1),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(item.$2, color: Colors.greenAccent),
-                const SizedBox(height: 10),
-                Text(
-                  item.$1,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
-class _DecisionList extends StatelessWidget {
-  const _DecisionList();
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      ('Best photo', Icons.photo_outlined),
-      ('Natural pose suggestion', Icons.accessibility_new),
-      ('Aesthetic recommendation', Icons.palette_outlined),
-      ('Music suggestion', Icons.music_note_outlined),
-      ('Caption writing', Icons.edit_outlined),
-      ('Best posting time', Icons.schedule),
-    ];
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: features.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 1.35,
+      ),
+      itemBuilder: (context, index) {
+        final feature = features[index];
 
+        return Card(
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => FeaturePage(title: feature.title),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    feature.icon,
+                    size: 28,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: 9),
+                  Text(
+                    feature.title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _Feature {
+  final String title;
+  final IconData icon;
+
+  const _Feature(this.title, this.icon);
+}
+
+class DecisionList extends StatelessWidget {
+  const DecisionList({super.key});
+
+  final List<String> decisions = const [
+    'Best photo',
+    'Natural pose suggestion',
+    'Aesthetic recommendation',
+    'Music suggestion',
+    'Caption writing',
+    'Best posting time',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Card(
       child: Column(
         children: [
-          for (int i = 0; i < items.length; i++) ...[
+          for (int i = 0; i < decisions.length; i++)
             ListTile(
-              leading: Icon(items[i].$2, color: Colors.greenAccent),
-              title: Text(items[i].$1),
+              leading: CircleAvatar(
+                radius: 18,
+                child: Text('${i + 1}'),
+              ),
+              title: Text(decisions[i]),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () {},
+              onTap: () {
+                showInfo(
+                  context,
+                  decisions[i],
+                  'GM will prepare this recommendation for your content.',
+                );
+              },
             ),
-            if (i != items.length - 1) const Divider(height: 1),
-          ],
         ],
       ),
     );
   }
 }
 
-class _NaturalLookNotice extends StatelessWidget {
-  const _NaturalLookNotice();
+class NaturalLookCard extends StatelessWidget {
+  const NaturalLookCard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(
+            Icon(
               Icons.verified_user_outlined,
-              color: Colors.greenAccent,
+              color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(width: 12),
             const Expanded(
-              child: Text(
-                'GM keeps your look natural. No face or body-structure changes.',
-                style: TextStyle(color: Colors.white70),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'GM natural-look rule',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 6),
+                  Text(
+                    'Your face identity and body proportions stay natural. '
+                    'GM does not intentionally change face or body structure.',
+                  ),
+                ],
               ),
             ),
           ],
@@ -415,358 +405,369 @@ class _NaturalLookNotice extends StatelessWidget {
   }
 }
 
-// ============================================================
-// CONTENT
-// ============================================================
+/* -------------------------------------------------------------------------- */
+/* CONTENT                                                                    */
+/* -------------------------------------------------------------------------- */
 
 class ContentPage extends StatelessWidget {
   const ContentPage({super.key});
 
+  final List<_ContentItem> items = const [
+    _ContentItem('Posts', Icons.photo_library_outlined),
+    _ContentItem('Instagram Stories', Icons.auto_stories_outlined),
+    _ContentItem('Reels', Icons.video_library_outlined),
+    _ContentItem('Collage Creator', Icons.collections_outlined),
+    _ContentItem('Highlights Manager', Icons.star_border),
+    _ContentItem('Content Calendar', Icons.calendar_month_outlined),
+    _ContentItem('Drafts', Icons.drafts_outlined),
+    _ContentItem('Saved Ideas', Icons.lightbulb_outline),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final features = [
-      ('Posts', Icons.photo_library_outlined),
-      ('Instagram Stories', Icons.auto_stories_outlined),
-      ('Reels', Icons.video_library_outlined),
-      ('Collage Creator', Icons.collections_outlined),
-      ('Highlights Manager', Icons.star_outline),
-      ('Content Calendar', Icons.calendar_month_outlined),
-      ('Drafts', Icons.drafts_outlined),
-      ('Saved Ideas', Icons.lightbulb_outline),
-    ];
-
-    return CustomScrollView(
-      slivers: [
-        const SliverAppBar.large(
-          title: Text('Content Manager'),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.all(16),
-          sliver: SliverGrid(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final item = features[index];
-
-                return Card(
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
-                    onTap: () => showFeature(context, item.$1),
-                    child: Padding(
-                      padding: const EdgeInsets.all(18),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            item.$2,
-                            size: 34,
-                            color: Colors.greenAccent,
+    return SafeArea(
+      child: CustomScrollView(
+        slivers: [
+          const SliverAppBar.large(
+            title: Text('Content Manager'),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                const Text(
+                  'Choose what you want GM to manage.',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 16),
+                for (final item in items)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Card(
+                      child: ListTile(
+                        leading: Icon(
+                          item.icon,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        title: Text(
+                          item.title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
                           ),
-                          const SizedBox(height: 12),
-                          Text(
-                            item.$1,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
+                        ),
+                        subtitle: const Text('Open manager'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  FeaturePage(title: item.title),
                             ),
-                          ),
-                        ],
+                          );
+                        },
                       ),
                     ),
                   ),
-                );
-              },
-              childCount: features.length,
-            ),
-            gridDelegate:
-                const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.15,
+              ]),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-// ============================================================
-// PLANNER
-// ============================================================
+class _ContentItem {
+  final String title;
+  final IconData icon;
+
+  const _ContentItem(this.title, this.icon);
+}
+
+/* -------------------------------------------------------------------------- */
+/* PLANNER                                                                    */
+/* -------------------------------------------------------------------------- */
 
 class PlannerPage extends StatelessWidget {
   const PlannerPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final days = [
-      ('MON', 'Photo post', '7:30 PM'),
-      ('TUE', 'Story', '12:30 PM'),
-      ('WED', 'Reel idea', '8:00 PM'),
-      ('THU', 'Story', '6:30 PM'),
-      ('FRI', 'Main post', '7:00 PM'),
-      ('SAT', 'Collage', '5:30 PM'),
-      ('SUN', 'Rest / review', '—'),
-    ];
-
-    return CustomScrollView(
-      slivers: [
-        const SliverAppBar.large(
-          title: Text('Content Planner'),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.all(16),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Weekly strategy',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Plan posts, stories and ideas before publishing.',
-                        style: TextStyle(color: Colors.white60),
-                      ),
-                      const SizedBox(height: 16),
-                      FilledButton.icon(
-                        onPressed: () => showFeature(
-                          context,
-                          'Create Content Plan',
-                        ),
-                        icon: const Icon(Icons.add),
-                        label: const Text('Create plan'),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              for (final day in days)
-                Card(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor:
-                          Colors.green.withValues(alpha: .15),
-                      child: Text(
-                        day.$1.substring(0, 1),
-                        style: const TextStyle(
-                          color: Colors.greenAccent,
-                        ),
-                      ),
-                    ),
-                    title: Text(day.$2),
-                    subtitle: Text(day.$3),
-                    trailing: const Icon(Icons.chevron_right),
-                  ),
-                ),
-            ]),
+    return SafeArea(
+      child: CustomScrollView(
+        slivers: [
+          const SliverAppBar.large(
+            title: Text('Planner'),
           ),
-        ),
-      ],
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Content calendar',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Plan posts, Stories and Reels before publishing.',
+                        ),
+                        const SizedBox(height: 18),
+                        FilledButton.icon(
+                          onPressed: () {
+                            showInfo(
+                              context,
+                              'New content',
+                              'Content planning is ready. '
+                                  'Add your post, Story or Reel here.',
+                            );
+                          },
+                          icon: const Icon(Icons.add),
+                          label: const Text('Plan content'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const _PlanTile(
+                  day: 'Today',
+                  type: 'Post',
+                  title: 'Premium natural portrait',
+                ),
+                const _PlanTile(
+                  day: 'Tomorrow',
+                  type: 'Story',
+                  title: 'Behind the scenes',
+                ),
+                const _PlanTile(
+                  day: 'Saturday',
+                  type: 'Reel',
+                  title: 'Lifestyle Reel',
+                ),
+                const _PlanTile(
+                  day: 'Sunday',
+                  type: 'Story',
+                  title: 'Weekly recap',
+                ),
+              ]),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-// ============================================================
-// PROFILE / PERSONAL AI MEMORY
-// ============================================================
-
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final settings = [
-      ('Personal Style', 'Natural • Premium • Clean', Icons.style),
-      ('Face Identity', 'Reference protected', Icons.face),
-      ('Body Proportions', 'Do not alter', Icons.accessibility_new),
-      ('Communication', 'Your normal style', Icons.chat_outlined),
-      ('Aesthetic', 'Simple • Professional', Icons.palette_outlined),
-      ('Approval', 'Manual approval required', Icons.verified_outlined),
-    ];
-
-    return CustomScrollView(
-      slivers: [
-        const SliverAppBar.large(
-          title: Text('GM Profile'),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.all(16),
-          sliver: SliverList(
-            delegate: SliverChildListDelegate([
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 34,
-                        backgroundColor:
-                            Colors.green.withValues(alpha: .15),
-                        child: const Icon(
-                          Icons.person,
-                          size: 36,
-                          color: Colors.greenAccent,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Personal AI Memory',
-                              style: TextStyle(
-                                fontSize: 19,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Your preferences for GM',
-                              style:
-                                  TextStyle(color: Colors.white60),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              for (final setting in settings)
-                Card(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: ListTile(
-                    leading: Icon(
-                      setting.$3,
-                      color: Colors.greenAccent,
-                    ),
-                    title: Text(setting.$1),
-                    subtitle: Text(setting.$2),
-                    trailing:
-                        const Icon(Icons.chevron_right),
-                    onTap: () => showFeature(
-                      context,
-                      setting.$1,
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 8),
-              Card(
-                child: SwitchListTile(
-                  value: true,
-                  onChanged: (value) {},
-                  title: const Text('Require approval before posting'),
-                  subtitle: const Text(
-                    'GM never publishes without your approval.',
-                  ),
-                ),
-              ),
-            ]),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ============================================================
-// REUSABLE UI
-// ============================================================
-
-class _SectionTitle extends StatelessWidget {
+class _PlanTile extends StatelessWidget {
+  final String day;
+  final String type;
   final String title;
-  final String? action;
-  final VoidCallback? onTap;
 
-  const _SectionTitle({
+  const _PlanTile({
+    required this.day,
+    required this.type,
     required this.title,
-    this.action,
-    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+    return Card(
+      child: ListTile(
+        leading: CircleAvatar(
+          child: Icon(
+            type == 'Post'
+                ? Icons.photo_outlined
+                : type == 'Reel'
+                    ? Icons.video_library_outlined
+                    : Icons.auto_stories_outlined,
           ),
         ),
-        if (action != null)
-          TextButton(
-            onPressed: onTap,
-            child: Text(action!),
-          ),
-      ],
+        title: Text(title),
+        subtitle: Text('$day • $type'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          showInfo(context, title, '$type planned for $day.');
+        },
+      ),
     );
   }
 }
 
-class _SmallTag extends StatelessWidget {
-  final String text;
+/* -------------------------------------------------------------------------- */
+/* PROFILE                                                                    */
+/* -------------------------------------------------------------------------- */
 
-  const _SmallTag({required this.text});
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  bool naturalEditing = true;
+  bool premiumStyle = true;
+  bool approvalRequired = true;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 6,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.green.withValues(alpha: .12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.greenAccent,
-          fontSize: 12,
-        ),
+    return SafeArea(
+      child: CustomScrollView(
+        slivers: [
+          const SliverAppBar.large(
+            title: Text('Personal Profile'),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.all(16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      children: [
+                        const CircleAvatar(
+                          radius: 42,
+                          child: Icon(
+                            Icons.person,
+                            size: 44,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'GM Personal Style',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        const Text(
+                          'Natural • Premium • Simple • Clean • Professional',
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Card(
+                  child: Column(
+                    children: [
+                      SwitchListTile(
+                        title: const Text('Natural editing'),
+                        subtitle: const Text(
+                          'Protect natural face and body appearance',
+                        ),
+                        value: naturalEditing,
+                        onChanged: (value) {
+                          setState(() {
+                            naturalEditing = value;
+                          });
+                        },
+                      ),
+                      SwitchListTile(
+                        title: const Text('Premium style'),
+                        subtitle: const Text(
+                          'Keep visuals clean and professional',
+                        ),
+                        value: premiumStyle,
+                        onChanged: (value) {
+                          setState(() {
+                            premiumStyle = value;
+                          });
+                        },
+                      ),
+                      SwitchListTile(
+                        title: const Text('Approval required'),
+                        subtitle: const Text(
+                          'GM never publishes without your approval',
+                        ),
+                        value: approvalRequired,
+                        onChanged: (value) {
+                          setState(() {
+                            approvalRequired = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Card(
+                  child: Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.face_outlined),
+                        title: const Text('Face identity reference'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => showInfo(
+                          context,
+                          'Face identity',
+                          'This area is reserved for your identity reference.',
+                        ),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.accessibility_new_outlined),
+                        title: const Text('Body proportions reference'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => showInfo(
+                          context,
+                          'Body proportions',
+                          'This area is reserved for your natural proportions reference.',
+                        ),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.checkroom_outlined),
+                        title: const Text('Clothing preferences'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => showInfo(
+                          context,
+                          'Clothing',
+                          'Add your preferred clothing and styling direction here.',
+                        ),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.chat_bubble_outline),
+                        title: const Text('Communication style'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => showInfo(
+                          context,
+                          'Communication style',
+                          'GM can use your preferred communication style.',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-// ============================================================
-// FEATURE SCREEN
-// ============================================================
-
-void showFeature(BuildContext context, String feature) {
-  Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (_) => FeaturePage(title: feature),
-    ),
-  );
-}
+/* -------------------------------------------------------------------------- */
+/* FEATURE PAGE                                                               */
+/* -------------------------------------------------------------------------- */
 
 class FeaturePage extends StatelessWidget {
   final String title;
 
   const FeaturePage({
-    required this.title,
     super.key,
+    required this.title,
   });
 
   @override
@@ -782,82 +783,77 @@ class FeaturePage extends StatelessWidget {
         children: [
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(22),
+              padding: const EdgeInsets.all(20),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
                     data.icon,
-                    size: 48,
-                    color: Colors.greenAccent,
+                    size: 52,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 14),
                   Text(
                     title,
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize: 26,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
                   Text(
                     data.description,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: Colors.white60,
-                      height: 1.5,
-                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
-          ...data.actions.map(
-            (action) => Card(
-              child: ListTile(
-                leading: Icon(
-                  action.icon,
-                  color: Colors.greenAccent,
+          for (final action in data.actions)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Card(
+                child: ListTile(
+                  leading: Icon(action.icon),
+                  title: Text(action.title),
+                  subtitle: Text(action.subtitle),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () {
+                    showInfo(
+                      context,
+                      action.title,
+                      action.message,
+                    );
+                  },
                 ),
-                title: Text(action.title),
-                subtitle: Text(action.subtitle),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  showInfo(
-                    context,
-                    action.title,
-                    action.message,
-                  );
-                },
               ),
             ),
-          ),
         ],
       ),
     );
   }
 }
 
-class FeatureInfo {
+class _FeatureData {
   final IconData icon;
   final String description;
-  final List<FeatureAction> actions;
+  final List<_FeatureAction> actions;
 
-  FeatureInfo({
+  const _FeatureData({
     required this.icon,
     required this.description,
     required this.actions,
   });
 }
 
-class FeatureAction {
+class _FeatureAction {
   final String title;
   final String subtitle;
   final String message;
   final IconData icon;
 
-  FeatureAction({
+  const _FeatureAction({
     required this.title,
     required this.subtitle,
     required this.message,
@@ -865,190 +861,422 @@ class FeatureAction {
   });
 }
 
-FeatureInfo featureData(String title) {
+_FeatureData featureData(String title) {
   switch (title) {
     case 'Photo Studio':
-      return FeatureInfo(
-        icon: Icons.camera_alt_outlined,
+      return const _FeatureData(
+        icon: Icons.photo_camera_outlined,
         description:
             'Prepare photos with a natural, premium and professional direction.',
         actions: [
-          FeatureAction(
+          _FeatureAction(
             title: 'Choose photos',
-            subtitle: 'Select 2–3 candidate photos',
+            subtitle: 'Prepare 2–3 photos for review',
             message:
-                'Photo selection interface is ready. '
-                'Connect a device photo picker in the next integration stage.',
+                'Select 2–3 candidate photos on your device, then use GM to compare them.',
             icon: Icons.photo_library_outlined,
           ),
-          FeatureAction(
-            title: 'Natural pose',
-            subtitle: 'Pose guidance without changing identity',
-            message:
-                'GM can provide pose guidance while preserving your face and body structure.',
-            icon: Icons.accessibility_new,
-          ),
-          FeatureAction(
+          _FeatureAction(
             title: 'Editing direction',
-            subtitle: 'Premium but not over-edited',
+            subtitle: 'Natural correction only',
             message:
-                'Recommended direction: natural lighting, clean color, realistic skin and subtle background improvements.',
+                'Recommended direction: exposure, contrast, crop and subtle color correction.',
             icon: Icons.tune,
+          ),
+          _FeatureAction(
+            title: 'Pose direction',
+            subtitle: 'Natural pose suggestions',
+            message:
+                'GM can suggest natural pose changes without changing your face or body structure.',
+            icon: Icons.accessibility_new_outlined,
           ),
         ],
       );
 
     case 'AI Post Suggestions':
-      return FeatureInfo(
-        icon: Icons.psychology,
+      return const _FeatureData(
+        icon: Icons.auto_awesome,
         description:
-            'Compare your candidate photos and prepare a complete post recommendation.',
+            'Compare your content and prepare a complete posting recommendation.',
         actions: [
-          FeatureAction(
+          _FeatureAction(
             title: 'Best photo',
-            subtitle: 'Select the strongest candidate',
+            subtitle: 'Choose the strongest candidate',
             message:
-                'GM will compare composition, expression, lighting and overall fit.',
-            icon: Icons.photo,
+                'GM recommendation: select the photo with the strongest composition, natural expression and clean background.',
+            icon: Icons.star_outline,
           ),
-          FeatureAction(
+          _FeatureAction(
             title: 'Caption',
-            subtitle: 'Write a matching caption',
+            subtitle: 'Natural personal caption',
             message:
-                'Caption style: natural, simple, confident and professional.',
-            icon: Icons.edit,
+                'Suggested caption style: short, natural and confident. Avoid overused or artificial wording.',
+            icon: Icons.edit_outlined,
           ),
-          FeatureAction(
+          _FeatureAction(
             title: 'Music',
-            subtitle: 'Recommend suitable music',
+            subtitle: 'Match music to the visual mood',
             message:
-                'Music should match the visual mood and content type.',
-            icon: Icons.music_note,
+                'Choose music that matches the mood of the photo and your audience.',
+            icon: Icons.music_note_outlined,
           ),
-          FeatureAction(
+          _FeatureAction(
             title: 'Posting time',
-            subtitle: 'Choose the best time',
+            subtitle: 'Plan the best time',
             message:
-                'Audience analytics can be connected later to calculate personalized posting times.',
+                'Use your audience analytics to determine the strongest posting window.',
             icon: Icons.schedule,
           ),
         ],
       );
 
-    case 'Stories & Collage':
-      return FeatureInfo(
+    case 'Instagram Stories':
+      return const _FeatureData(
         icon: Icons.auto_stories_outlined,
         description:
-            'Plan Instagram Stories and create simple photo layouts.',
+            'Plan clean and natural Instagram Stories.',
         actions: [
-          FeatureAction(
-            title: 'Story planner',
-            subtitle: 'Build a sequence of stories',
+          _FeatureAction(
+            title: 'Story sequence',
+            subtitle: 'Plan multiple frames',
             message:
-                'Create a sequence such as photo → thought → music → interaction.',
-            icon: Icons.auto_stories,
+                'Example sequence: main photo → short context → music → interaction sticker.',
+            icon: Icons.view_carousel_outlined,
           ),
-          FeatureAction(
-            title: 'Collage Creator',
-            subtitle: 'Combine selected photos',
-            message:
-                'Choose a clean grid or editorial-style collage layout.',
-            icon: Icons.collections,
-          ),
-          FeatureAction(
+          _FeatureAction(
             title: 'Story idea',
-            subtitle: 'Generate an idea',
+            subtitle: 'Create a natural story concept',
             message:
-                'GM can suggest story concepts based on your content plan.',
+                'Use behind-the-scenes, daily moments, location details or a simple personal update.',
             icon: Icons.lightbulb_outline,
           ),
-        ],
-      );
-
-    case 'Highlights Manager':
-      return FeatureInfo(
-        icon: Icons.star_outline,
-        description:
-            'Organize Instagram Highlight categories and cover ideas.',
-        actions: [
-          FeatureAction(
-            title: 'Highlight categories',
-            subtitle: 'Create organized categories',
-            message:
-                'Possible categories: Life, Travel, Work, Moments and Favorites.',
-            icon: Icons.folder_outlined,
-          ),
-          FeatureAction(
-            title: 'Cover style',
-            subtitle: 'Keep covers consistent',
-            message:
-                'Recommended style: simple, clean and premium.',
-            icon: Icons.image_outlined,
-          ),
-        ],
-      );
-
-    case 'Analytics':
-      return FeatureInfo(
-        icon: Icons.analytics_outlined,
-        description:
-            'Review content performance and learn what works best.',
-        actions: [
-          FeatureAction(
-            title: 'Post performance',
-            subtitle: 'Likes, comments and reach',
-            message:
-                'Connect Instagram insights in a later integration stage.',
-            icon: Icons.bar_chart,
-          ),
-          FeatureAction(
-            title: 'Best time',
-            subtitle: 'Audience activity',
-            message:
-                'Personalized timing requires real Instagram audience data.',
-            icon: Icons.schedule,
-          ),
-        ],
-      );
-
-    case 'Approval':
-      return FeatureInfo(
-        icon: Icons.verified_outlined,
-        description:
-            'Keep final control over every piece of content.',
-        actions: [
-          FeatureAction(
-            title: 'Pending approval',
+          _FeatureAction(
+            title: 'Story approval',
             subtitle: 'Review before publishing',
             message:
-                'GM prepares content but waits for your approval.',
-            icon: Icons.pending_actions,
-          ),
-          FeatureAction(
-            title: 'Approve',
-            subtitle: 'Give final permission',
-            message:
-                'Your approval is required before any future publishing integration.',
+                'GM keeps publishing under your approval.',
             icon: Icons.check_circle_outline,
           ),
         ],
       );
 
+    case 'Reels':
+      return const _FeatureData(
+        icon: Icons.video_library_outlined,
+        description:
+            'Plan short-form video content and Reel concepts.',
+        actions: [
+          _FeatureAction(
+            title: 'Reel concept',
+            subtitle: 'Create a content idea',
+            message:
+                'Start with a strong opening shot, natural movement and a simple ending.',
+            icon: Icons.movie_creation_outlined,
+          ),
+          _FeatureAction(
+            title: 'Audio direction',
+            subtitle: 'Match audio to mood',
+            message:
+                'Choose audio that fits the visual style and current audience interest.',
+            icon: Icons.music_note_outlined,
+          ),
+          _FeatureAction(
+            title: 'Caption',
+            subtitle: 'Write Reel copy',
+            message:
+                'Keep the caption short and aligned with your personal communication style.',
+            icon: Icons.edit_outlined,
+          ),
+        ],
+      );
+
+    case 'Collage Creator':
+      return const _FeatureData(
+        icon: Icons.collections_outlined,
+        description:
+            'Plan simple premium collages without making the result look artificial.',
+        actions: [
+          _FeatureAction(
+            title: '2-photo layout',
+            subtitle: 'Clean side-by-side concept',
+            message:
+                'Use two photos with similar lighting and visual balance.',
+            icon: Icons.view_column_outlined,
+          ),
+          _FeatureAction(
+            title: '3-photo layout',
+            subtitle: 'Main photo + supporting images',
+            message:
+                'Use one main image and two supporting images for a clean visual hierarchy.',
+            icon: Icons.dashboard_outlined,
+          ),
+          _FeatureAction(
+            title: 'Minimal style',
+            subtitle: 'Keep the design clean',
+            message:
+                'Avoid excessive borders, stickers and effects.',
+            icon: Icons.crop_square,
+          ),
+        ],
+      );
+
+    case 'Highlights Manager':
+      return const _FeatureData(
+        icon: Icons.star_border,
+        description:
+            'Organize your Instagram Highlights into a clean profile structure.',
+        actions: [
+          _FeatureAction(
+            title: 'Suggested categories',
+            subtitle: 'Build your Highlight structure',
+            message:
+                'Possible categories: Life, Travel, Work, Style, Moments and Favorites.',
+            icon: Icons.folder_outlined,
+          ),
+          _FeatureAction(
+            title: 'Cover direction',
+            subtitle: 'Keep covers consistent',
+            message:
+                'Use simple, clean covers with a consistent visual language.',
+            icon: Icons.image_outlined,
+          ),
+          _FeatureAction(
+            title: 'Review highlights',
+            subtitle: 'Keep your profile organized',
+            message:
+                'Remove outdated Stories and keep the strongest moments visible.',
+            icon: Icons.checklist,
+          ),
+        ],
+      );
+
+    case 'Content Calendar':
+      return const _FeatureData(
+        icon: Icons.calendar_month_outlined,
+        description:
+            'Organize posts, Stories and Reels before publishing.',
+        actions: [
+          _FeatureAction(
+            title: 'Weekly plan',
+            subtitle: 'Build your week',
+            message:
+                'Plan a balanced mix of Posts, Stories and Reels instead of posting randomly.',
+            icon: Icons.date_range_outlined,
+          ),
+          _FeatureAction(
+            title: 'Posting window',
+            subtitle: 'Choose a time',
+            message:
+                'Use audience performance data to refine the posting window.',
+            icon: Icons.schedule,
+          ),
+        ],
+      );
+
+    case 'Drafts':
+      return const _FeatureData(
+        icon: Icons.drafts_outlined,
+        description:
+            'Keep unfinished content ready for later review.',
+        actions: [
+          _FeatureAction(
+            title: 'New draft',
+            subtitle: 'Save an idea',
+            message:
+                'Draft saved conceptually. Connect persistent storage in a later backend version.',
+            icon: Icons.add,
+          ),
+          _FeatureAction(
+            title: 'Approval queue',
+            subtitle: 'Review before publishing',
+            message:
+                'All publishing decisions remain under your control.',
+            icon: Icons.check_circle_outline,
+          ),
+        ],
+      );
+
+    case 'Saved Ideas':
+      return const _FeatureData(
+        icon: Icons.lightbulb_outline,
+        description:
+            'Keep future content ideas in one place.',
+        actions: [
+          _FeatureAction(
+            title: 'Photo idea',
+            subtitle: 'Save a photography concept',
+            message:
+                'Example: natural outdoor portrait with soft evening light.',
+            icon: Icons.camera_alt_outlined,
+          ),
+          _FeatureAction(
+            title: 'Story idea',
+            subtitle: 'Save a Story concept',
+            message:
+                'Example: a simple behind-the-scenes moment with a short caption.',
+            icon: Icons.auto_stories_outlined,
+          ),
+        ],
+      );
+
+    case 'Approval':
+      return const _FeatureData(
+        icon: Icons.check_circle_outline,
+        description:
+            'GM prepares recommendations, but you remain the final decision-maker.',
+        actions: [
+          _FeatureAction(
+            title: 'Review content',
+            subtitle: 'Check before publishing',
+            message:
+                'Review the selected photo, caption, music, timing and aesthetic before publishing.',
+            icon: Icons.rate_review_outlined,
+          ),
+          _FeatureAction(
+            title: 'Approve',
+            subtitle: 'Give final permission',
+            message:
+                'Approval is intentionally kept as a user-controlled action.',
+            icon: Icons.check,
+          ),
+          _FeatureAction(
+            title: 'Reject',
+            subtitle: 'Send back for changes',
+            message:
+                'Reject the recommendation and revise it before publishing.',
+            icon: Icons.close,
+          ),
+        ],
+      );
+
+    case 'Analytics':
+      return const _FeatureData(
+        icon: Icons.analytics_outlined,
+        description:
+            'Track content performance and use the results to improve future recommendations.',
+        actions: [
+          _FeatureAction(
+            title: 'Post performance',
+            subtitle: 'Review results',
+            message:
+                'Track reach, engagement, saves, shares and profile activity once analytics data is connected.',
+            icon: Icons.bar_chart_outlined,
+          ),
+          _FeatureAction(
+            title: 'Audience timing',
+            subtitle: 'Find stronger posting windows',
+            message:
+                'Use audience activity data to identify stronger posting times.',
+            icon: Icons.schedule,
+          ),
+          _FeatureAction(
+            title: 'Content patterns',
+            subtitle: 'Learn what works',
+            message:
+                'Compare different formats and topics to improve your content strategy.',
+            icon: Icons.insights_outlined,
+          ),
+        ],
+      );
+
+    case 'Personal Style':
+      return const _FeatureData(
+        icon: Icons.person_outline,
+        description:
+            'Your personal GM style profile.',
+        actions: [
+          _FeatureAction(
+            title: 'Natural',
+            subtitle: 'Preserve identity',
+            message:
+                'GM should keep your appearance natural and recognizable.',
+            icon: Icons.face_outlined,
+          ),
+          _FeatureAction(
+            title: 'Premium',
+            subtitle: 'Professional visual direction',
+            message:
+                'Prefer polished but realistic results.',
+            icon: Icons.workspace_premium_outlined,
+          ),
+          _FeatureAction(
+            title: 'Simple & clean',
+            subtitle: 'Avoid over-editing',
+            message:
+                'Keep edits subtle and backgrounds authentic.',
+            icon: Icons.cleaning_services_outlined,
+          ),
+        ],
+      );
+
     default:
-      return FeatureInfo(
+      return const _FeatureData(
         icon: Icons.auto_awesome,
         description:
-            'GM Manager feature workspace.',
+            'GM Manager feature.',
         actions: [
-          FeatureAction(
-            title: 'Open workspace',
-            subtitle: 'Manage this feature',
+          _FeatureAction(
+            title: 'Open',
+            subtitle: 'Feature ready',
             message:
-                'This feature is included in the GM Manager interface.',
+                'This GM Manager feature is ready for the next integration stage.',
             icon: Icons.arrow_forward,
           ),
         ],
       );
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* SHARED WIDGETS                                                             */
+/* -------------------------------------------------------------------------- */
+
+class SectionTitle extends StatelessWidget {
+  final String title;
+  final String subtitle;
+
+  const SectionTitle({
+    super.key,
+    required this.title,
+    required this.subtitle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(subtitle),
+      ],
+    );
+  }
+}
+
+class TagChip extends StatelessWidget {
+  final String label;
+
+  const TagChip({
+    super.key,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      avatar: const Icon(
+        Icons.check,
+        size: 16,
+      ),
+      label: Text(label),
+    );
   }
 }
 
@@ -1065,7 +1293,7 @@ void showInfo(
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('OK'),
           ),
         ],
