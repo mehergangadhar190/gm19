@@ -11,41 +11,49 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Java
+      - name: Setup Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
 
-      - name: Install Flutter
-        run: |
-          git clone --depth 1 --branch 3.44.7 https://github.com/flutter/flutter.git "$HOME/flutter"
-          echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
-          "$HOME/flutter/bin/flutter" --version
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.35.7'
+          cache: true
 
       - name: Create Flutter project
         run: |
-          if [ ! -f pubspec.yaml ]; then
-            "$HOME/flutter/bin/flutter" create --platforms=android --project-name=gmmanager .
-          fi
+          flutter create --platforms=android --org com.gmmanager gmmanager
+
+      - name: Remove default test
+        run: |
+          rm -rf gmmanager/test
+
+      - name: Copy GM Manager code
+        run: |
+          mkdir -p gmmanager/lib
+          cp lib/main.dart gmmanager/lib/main.dart
 
       - name: Get packages
-        run: |
-          "$HOME/flutter/bin/flutter" pub get
+        working-directory: gmmanager
+        run: flutter pub get
 
       - name: Analyze
-        run: |
-          "$HOME/flutter/bin/flutter" analyze
+        working-directory: gmmanager
+        run: flutter analyze
 
       - name: Build APK
-        run: |
-          "$HOME/flutter/bin/flutter" build apk --release
+        working-directory: gmmanager
+        run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: GM-Manager-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: gmmanager/build/app/outputs/flutter-apk/app-release.apk
